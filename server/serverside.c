@@ -50,12 +50,7 @@ int main() {
     i = 0;
     while(buf[i] != '\0')
     {
-      if ((buf[i] < 90 && buf[i] > 64) || (buf[i] < 122 && buf[i] > 96)){
-        buf[i] = buf[i] + 1;
-      } else if (buf[i] == 90 || buf[i] == 122)
-      {
-        buf[i] = buf[i]-25;
-      }
+      buf[i] = buf[i] + 1;
       i++;
     }
 
