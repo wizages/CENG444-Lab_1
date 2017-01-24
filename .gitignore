@@ -1,0 +1,45 @@
+*
+!/**/
+!*.*
+!makefile
+!Makefile
+
+# Compiled Object files
+*.slo
+*.lo
+*.o
+*.d
+*.obj
+*.compiled
+
+# Precompiled Headers
+*.gch
+*.pch
+
+# Compiled Dynamic libraries
+*.so
+*.dylib
+*.dll
+
+# Fortran module files
+*.mod
+
+# Compiled Static libraries
+*.lai
+*.la
+*.a
+*.lib
+
+# Executables
+*.exe
+*.out
+*.app
+
+# Compressed
+*.tgz
+
+# Apple crap
+.DS_Store
+SA2/main
+
+SA4/main
