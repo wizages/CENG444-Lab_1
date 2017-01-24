@@ -1,39 +1,53 @@
-/****************** CLIENT CODE ****************/
-
 #include <stdio.h>
-#include <sys/socket.h>
-#include <netinet/in.h>
+#include <stdlib.h>
+#include <errno.h>
 #include <string.h>
+#include <netdb.h>
+#include <sys/types.h>
+#include <netinet/in.h>
+#include <sys/socket.h>
 
-int main(){
-  int clientSocket;
-  char buffer[1024];
-  struct sockaddr_in serverAddr;
-  socklen_t addr_size;
+#define PORT 3490 // the port client will be connecting to
+#define MAXDATASIZE 256 // max number of bytes we can get at once
 
-  /*---- Create the socket. The three arguments are: ----*/
-  /* 1) Internet domain 2) Stream socket 3) Default protocol (TCP in this case) */
-  clientSocket = socket(PF_INET, SOCK_STREAM, 0);
-  
-  /*---- Configure settings of the server address struct ----*/
-  /* Address family = Internet */
-  serverAddr.sin_family = AF_INET;
-  /* Set port number, using htons function to use proper byte order */
-  serverAddr.sin_port = htons(7891);
-  /* Set IP address to localhost */
-  serverAddr.sin_addr.s_addr = inet_addr("127.0.0.1");
-  /* Set all bits of the padding field to 0 */
-  memset(serverAddr.sin_zero, '\0', sizeof serverAddr.sin_zero);  
+int main(int argc, char *argv[]){
+  int sockfd, numbytes;
+  char buf[MAXDATASIZE];
+  struct hostent *he;
+  struct sockaddr_in their_addr; // server's address information
+  if (argc != 3) {
+    fprintf(stderr,"usage: main server_hostname message \n"); exit(1);
+  }
+  if ((sockfd = socket(AF_INET, SOCK_STREAM, 0)) == -1) { 
+    perror("socket");
+    exit(1);
+  }
+  if ((he=gethostbyname(argv[1])) == NULL) { // get the host info including IP address 
+    perror("gethostbyname");
+    exit(1);
+  }
 
-  /*---- Connect the socket to the server using the address struct ----*/
-  addr_size = sizeof serverAddr;
-  connect(clientSocket, (struct sockaddr *) &serverAddr, addr_size);
+  their_addr.sin_family = AF_INET;
+  their_addr.sin_port = htons(PORT); //convert host byte order to network byte order 
+  memcpy(&their_addr.sin_addr, he->h_addr, he->h_length);
 
-  /*---- Read the message from the server into the buffer ----*/
-  recv(clientSocket, buffer, 1024, 0);
+  if (connect(sockfd, (struct sockaddr *)&their_addr, sizeof(struct sockaddr)) == -1) {
+    perror("connect");
+    exit(1); 
+  }
+  if(send(sockfd, argv[2], MAXDATASIZE, 0) < 0)
+  {
+    perror("send");
+    exit(1);
+    /*
+    */
+  }
 
-  /*---- Print the received message ----*/
-  printf("Data received: %s",buffer);   
 
-  return 0;
+  if ((numbytes=recv(sockfd, buf, MAXDATASIZE,0)) < 0) { 
+      perror("read");
+      exit(1);
+    }
+  printf("Received: %s\n",buf);
+  close(sockfd);
 }
